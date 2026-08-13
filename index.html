@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Great+Vibes&family=Playfair+Display:ital,wght@1,600&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 /* ============================================================
    MESA · FRESHERS 26
@@ -67,7 +68,7 @@ nav.top{display:flex;justify-content:space-between;align-items:center;padding:20
 /* ============================================================
    HOME  — full-bleed moving photo hero
    ============================================================ */
-#home{position:relative;min-height:calc(100vh - 42px);overflow:hidden}
+#home{position:relative;min-height:calc(100dvh - 42px);overflow:hidden}
 .hero-bg{position:absolute;inset:0;z-index:0;background:var(--hero) center/cover no-repeat;
   transform:scale(1.12);animation:kenburns 26s ease-in-out infinite alternate;will-change:transform}
 @keyframes kenburns{
@@ -79,7 +80,7 @@ nav.top{display:flex;justify-content:space-between;align-items:center;padding:20
     linear-gradient(180deg, rgba(10,4,20,.55) 0%, rgba(10,4,20,.05) 22%, rgba(10,4,20,.15) 50%, rgba(10,4,20,.85) 90%, var(--void) 100%),
     radial-gradient(120% 80% at 20% 90%, rgba(10,4,20,.7), transparent 60%)}
 .home-inner{position:relative;z-index:3;display:flex;flex-direction:column;justify-content:space-between;
-  min-height:calc(100vh - 42px);max-width:1200px;margin:0 auto;padding:0 22px}
+  min-height:calc(100dvh - 42px);max-width:1200px;margin:0 auto;padding:0 22px}
 
 /* hanging disco ball */
 .hang{position:absolute;z-index:2;top:0;left:12%;width:min(30vw,240px);transform-origin:top center;
@@ -171,14 +172,36 @@ nav.top{display:flex;justify-content:space-between;align-items:center;padding:20
 /* responsive */
 @media(max-width:860px){
   .pay-grid{grid-template-columns:1fr}
-  .hang{left:6%;width:min(38vw,180px)}
+  .hang{top:52px;left:6%;width:min(38vw,160px)}
   .ticker .count{display:none}
-  .hero-copy{padding-bottom:40px}
+  .hero-copy{padding-bottom:38px}
+}
+@media(max-width:600px){
+  .shell,.home-inner{padding:0 18px}
+  nav.top{padding:16px 0}
+  .brand{font-size:25px}
+  .kicker{font-size:10px;letter-spacing:.1em;flex-wrap:wrap;padding:6px 12px;margin-bottom:14px}
+  .eyebrow{font-size:clamp(28px,8vw,40px)}
+  .title{font-size:clamp(58px,17vw,110px)}
+  .meta{font-size:clamp(21px,6.4vw,32px);gap:5px 12px}
+  .venue{font-size:12px}
+  .tagline{font-size:15px;margin-bottom:20px}
+  .steps{gap:8px;margin-bottom:20px}
+  .step{font-size:11px;padding:8px 12px}
+  .cta-row{flex-direction:column;align-items:stretch;gap:12px}
+  .cta-row .btn{width:100%;justify-content:center}
+  .seats{text-align:center}
+  .hang{top:50px;left:5%;width:128px}
+  .pay-head h2{font-size:clamp(52px,16vw,80px)}
+  .panel{padding:20px}
+  .disclaimer{margin-top:16px}
+}
+@media(max-width:380px){
+  .title{font-size:54px}
+  .hang{width:112px;left:4%}
 }
 @media(max-width:480px){
-  .marquee span{animation-duration:12s}
-  .btn{padding:15px 22px}
-  .hang{left:4%;width:130px}
+  .marquee span{animation-duration:14s}
 }
 @media(prefers-reduced-motion:reduce){
   .hero-bg,.disco svg,.hang,.marquee span,.live-dot{animation:none!important}
@@ -195,7 +218,7 @@ nav.top{display:flex;justify-content:space-between;align-items:center;padding:20
   <span class="live-dot"></span>
   <span class="badge">Tickets Live</span>
   <div class="marquee"><span id="mq"></span></div>
-  <div class="count"><strong id="soldCount">0</strong> of <span id="totalCount">50</span> early-bird gone</div>
+  <div class="count">🎟 <strong id="totalCount">20</strong> early-bird passes</div>
 </div>
 
 <!-- ================= HOME ================= -->
@@ -227,7 +250,7 @@ nav.top{display:flex;justify-content:space-between;align-items:center;padding:20
       </div>
       <div class="cta-row">
         <button class="btn btn-primary" onclick="go('pay')">Get tickets now →</button>
-        <span class="seats">Only <b id="seatsLeft">50</b> early-bird passes left</span>
+        <span class="seats"><b id="seatsLeft">20</b> early-bird passes only</span>
       </div>
       <div class="disclaimer" id="disclaimer"></div>
     </div>
@@ -292,8 +315,7 @@ const CONFIG = {
   time:"7PM", date:"28 AUG", day:"FRI",          // 28 Aug 2026 = Friday
   venue:"Venue — TBA · add your address here",
   tagline:"New batch, first night, loudest one yet. Lasers, a mirror ball, and a floor that doesn't quit till the lights come on.",
-  earlyBirdTotal:20, earlyBirdSold:13,
-  liveSales:true, minLeft:2,   // auto-ticks up during the session; never shows fewer than minLeft left
+  earlyBirdTotal:20,
   currency:"₹",
   tiers:[
     {id:"early", name:"Early Bird", price:1199, note:"Only 20 · while they last"},
@@ -302,6 +324,8 @@ const CONFIG = {
   upiQrLink:"upi://pay?am=1199.00&cu=INR&mc=5441&mode=19&pa=breezenbloom578348.rzp@rxairtel&tn=Payment%20To%20BetterSweet&tr=TPJTG3PDCFzUqCqrv2",
   organizerWhatsApp:"916284684797",
   razorpayKeyId:"",     // add later to switch on card/netbanking checkout
+  supabaseUrl:"https://phpshcqlfcqrvunafoay.supabase.co",       // Supabase → Project Settings → API → Project URL
+  supabaseAnonKey:"sb_publishable_xUdcSAEllSDRSzghgPJAlw_J0uWKhYm",   // Supabase → Project Settings → API → anon public key
 };
 
 const $=s=>document.querySelector(s);
@@ -319,7 +343,8 @@ function fillStatic(){
   $("#tagline").textContent=CONFIG.tagline;
   $("#foot").innerHTML=`${CONFIG.org} · ${CONFIG.eventName} ${CONFIG.year} · ${CONFIG.time} · ${CONFIG.date} ${CONFIG.day} · ${CONFIG.venue}`;
   $("#totalCount").textContent=CONFIG.earlyBirdTotal;
-  $("#mq").innerHTML=`🔥 EARLY BIRD IS <b>LIVE</b> · ONLY <b>${CONFIG.earlyBirdTotal}</b> PASSES · <b id="mqLeft">–</b> LEFT · ${CONFIG.eventName.toUpperCase()} ${CONFIG.year} · ${CONFIG.date} ${CONFIG.day} · ${CONFIG.time} · GRAB YOURS BEFORE THEY'RE GONE · `;
+  $("#seatsLeft").textContent=CONFIG.earlyBirdTotal;
+  $("#mq").innerHTML=`🔥 EARLY BIRD IS <b>LIVE</b> · ONLY <b>${CONFIG.earlyBirdTotal}</b> EARLY-BIRD PASSES · ${CONFIG.eventName.toUpperCase()} ${CONFIG.year} · ${CONFIG.date} ${CONFIG.day} · ${CONFIG.time} · GRAB YOURS · `;
 }
 
 let selectedTier=CONFIG.tiers[0];
@@ -353,6 +378,7 @@ function confirmWhatsApp(){
 }
 function onPay(){
   if(!$("#fName").value||!$("#fPhone").value){toast("Add your name & phone first — so we can send your pass ✦");$("#fName").focus();return;}
+  saveLead('initiated');
   if(CONFIG.razorpayKeyId){
     if(typeof Razorpay==="undefined"){toast("Razorpay not loaded — add its script to enable cards");return;}
     new Razorpay({key:CONFIG.razorpayKeyId,amount:currentTotal()*100,currency:"INR",name:CONFIG.upiName,description:`${selectedTier.name}`,prefill:{name:$("#fName").value,email:$("#fEmail").value,contact:$("#fPhone").value},theme:{color:"#ff5a1f"}}).open();
@@ -391,26 +417,17 @@ const st=document.createElement("style");
 st.textContent=`.tw{animation:tw 2.6s ease-in-out infinite;animation-delay:var(--d)}@keyframes tw{0%,100%{opacity:.35}50%{opacity:1}}@media(prefers-reduced-motion:reduce){.tw{animation:none}}`;
 document.head.appendChild(st);
 
+/* ---------- Supabase: save buyer details (works on GitHub Pages / any static host) ---------- */
+let sb=null;
+try{ if(CONFIG.supabaseUrl && CONFIG.supabaseAnonKey && window.supabase){ sb=window.supabase.createClient(CONFIG.supabaseUrl, CONFIG.supabaseAnonKey);} }catch(e){}
+async function saveLead(status){
+  if(!sb) return;
+  try{ await sb.from('freshers_orders').insert({name:$("#fName").value,email:$("#fEmail").value,phone:$("#fPhone").value,pass:selectedTier.name,amount:currentTotal(),status:status}); }
+  catch(e){ console.warn('save failed',e); }
+}
+
 fillStatic();renderTiers();buildQR();updateTotal();
 
-/* ---------- live "tickets sold" (simulated urgency) ---------- */
-const SOLD_CEIL=Math.max(CONFIG.earlyBirdSold, CONFIG.earlyBirdTotal-CONFIG.minLeft);
-let soldNow=CONFIG.earlyBirdSold;
-function refreshCounts(){
-  const left=Math.max(0,CONFIG.earlyBirdTotal-soldNow);
-  $("#soldCount").textContent=soldNow;
-  $("#seatsLeft").textContent=left;
-  const ml=$("#mqLeft"); if(ml) ml.textContent=left;
-}
-function flashSold(){const el=document.querySelector(".ticker .count");if(!el)return;el.classList.remove("bump");void el.offsetWidth;el.classList.add("bump");}
-(function(){ // count-up on load
-  refreshCounts();
-  let c=0;const t=setInterval(()=>{c+=Math.max(1,Math.ceil(soldNow/25));if(c>=soldNow){c=soldNow;clearInterval(t);}$("#soldCount").textContent=c;},40);
-})();
-(function tick(){ // creep upward through the session
-  if(!CONFIG.liveSales||soldNow>=SOLD_CEIL)return;
-  setTimeout(()=>{soldNow++;refreshCounts();flashSold();tick();},(35+Math.random()*55)*1000);
-})();
 $("#payBtn").addEventListener("click",onPay);
 $("#confirmBtn").addEventListener("click",e=>{e.preventDefault();window.open(confirmWhatsApp(),"_blank");});
 document.querySelectorAll("video").forEach(v=>{const p=v.play();if(p&&p.catch)p.catch(()=>{});});
